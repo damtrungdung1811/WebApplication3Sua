@@ -16,8 +16,10 @@ namespace WebApplication3.Models
 
         [MaxLength(100)]
         public string? Email { get; set; }
-
+        
         [MaxLength(20)]
         public string TrangThai { get; set; }
     }
 }
+
+
