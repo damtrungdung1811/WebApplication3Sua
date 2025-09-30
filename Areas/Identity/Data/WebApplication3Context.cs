@@ -24,6 +24,14 @@ namespace WebApplication3.Data
         public DbSet<PhieuCongViec> PhieuCongViecs { get; set; }
         public DbSet<PhieuSuCo> PhieuSuCos { get; set; }
         public DbSet<VaiTro> VaiTros { get; set; }
+        public DbSet<Quyen> Quyens { get; set; }
+        public DbSet<NguoiDung> NguoiDungs { get; set; }
+        public DbSet<PhieuKho> PhieuKhos { get; set; }
+        public DbSet<PhieuKho_ChiTiet> PhieuKho_ChiTiets { get; set; }
+        public DbSet<SuDungLinhKien> SuDungLinhKiens { get; set; }
+
+
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -38,7 +46,11 @@ namespace WebApplication3.Data
             builder.Entity<PhieuCongViec>().ToTable("PhieuCongViec");
             builder.Entity<PhieuSuCo>().ToTable("PhieuSuCo");
             builder.Entity<VaiTro>().ToTable("VaiTro");
-
+            builder.Entity<Quyen>().ToTable("Quyen");
+            builder.Entity<NguoiDung>().ToTable("NguoiDung");
+            builder.Entity<PhieuKho>().ToTable("PhieuKho");
+            builder.Entity<PhieuKho_ChiTiet>().ToTable("PhieuKho_ChiTiet");
+            builder.Entity<SuDungLinhKien>().ToTable("SuDungLinhKien");
 
 
 
