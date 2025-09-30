@@ -23,7 +23,7 @@ namespace WebApplication3.Data
         public DbSet<LichBaoTri> LichBaoTris { get; set; }
         public DbSet<PhieuCongViec> PhieuCongViecs { get; set; }
         public DbSet<PhieuSuCo> PhieuSuCos { get; set; }
-
+        public DbSet<VaiTro> VaiTros { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -37,6 +37,8 @@ namespace WebApplication3.Data
             builder.Entity<LichBaoTri>().ToTable("LichBaoTri");
             builder.Entity<PhieuCongViec>().ToTable("PhieuCongViec");
             builder.Entity<PhieuSuCo>().ToTable("PhieuSuCo");
+            builder.Entity<VaiTro>().ToTable("VaiTro");
+
 
 
 
