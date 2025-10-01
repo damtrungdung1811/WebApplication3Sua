@@ -98,5 +98,6 @@ namespace WebApplication3.Controllers
                 return BadRequest("Dữ liệu quyền (QuyenJSON) không hợp lệ.");
             }
         }
+
     }
 }

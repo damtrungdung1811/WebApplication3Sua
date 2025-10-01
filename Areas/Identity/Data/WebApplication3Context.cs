@@ -24,6 +24,11 @@ namespace WebApplication3.Data
         public DbSet<PhieuCongViec> PhieuCongViecs { get; set; }
         public DbSet<PhieuSuCo> PhieuSuCos { get; set; }
         public DbSet<VaiTro> VaiTros { get; set; }
+        public DbSet<Checklist> Checklists { get; set; }
+        public DbSet<ChecklistItem> ChecklistItems { get; set; }
+        public DbSet<PCV_Checklist> PCV_Checklists { get; set; }
+        public DbSet<NhatKyHeThong> NhatKyHeThongs { get; set; }
+        public DbSet<TepDinhKem> TepDinhKems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -38,6 +43,12 @@ namespace WebApplication3.Data
             builder.Entity<PhieuCongViec>().ToTable("PhieuCongViec");
             builder.Entity<PhieuSuCo>().ToTable("PhieuSuCo");
             builder.Entity<VaiTro>().ToTable("VaiTro");
+            builder.Entity<Checklist>().ToTable("Checklist");
+            builder.Entity<ChecklistItem>().ToTable("ChecklistItem");
+            builder.Entity<PCV_Checklist>().ToTable("PCV_Checklist");
+            builder.Entity<NhatKyHeThong>().ToTable("NhatKyHeThong");
+            builder.Entity<TepDinhKem>().ToTable("TepDinhKem");
+
 
 
 

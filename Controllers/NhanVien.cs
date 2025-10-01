@@ -81,5 +81,48 @@ namespace WebApplication3.Controllers
 
             return Ok(new { message = "Xóa thành công" });
         }
+        // 🔹 KPI 1: Đếm số nhân viên đang hoạt động
+        [HttpGet("api/hoat-dong")]
+        public async Task<IActionResult> GetSoNhanVienHoatDong()
+        {
+            var count = await _context.NhanViens
+                                      .Where(nv => nv.TrangThai == "Hoạt động")
+                                      .CountAsync();
+
+            return Ok(new { SoNhanVienHoatDong = count });
+        }
+
+        // 🔹 KPI 2: Đếm số phiếu công việc được phân công cho từng nhân viên
+        [HttpGet("api/phieu-cong-viec")]
+        public async Task<IActionResult> GetNhanVienPhieuCongViec()
+        {
+            var result = await _context.NhanViens
+                .Select(nv => new
+                {
+                    nv.MaNV,
+                    nv.HoTen,
+                    SoPhieuCongViec = _context.PhieuCongViecs.Count(pcv => pcv.MaNV_PhanCong == nv.MaNV)
+                })
+                .ToListAsync();
+
+            return Ok(result);
+        }
+
+        // 🔹 KPI 3: Đếm số phiếu sự cố mà nhân viên tiếp nhận
+        [HttpGet("kpi/su-co")]
+        public async Task<IActionResult> GetNhanVienSuCo()
+        {
+            var result = await _context.NhanViens
+                .Select(nv => new
+                {
+                    nv.MaNV,
+                    nv.HoTen,
+                    SoSuCoTiepNhan = _context.PhieuSuCos.Count(sc => sc.MaNV_TiepNhan == nv.MaNV)
+                })
+                .ToListAsync();
+
+            return Ok(result);
+        }
+
     }
 }
