@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quản lý Khách hàng - Hệ thống Bảo trì</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Style nhỏ -->
+  <style>
+    /* Sidebar link */
+    .nav-link{
+      display:flex;align-items:center;gap:.75rem;
+      padding:.75rem 1rem;border-radius:.5rem;
+      color:#1f2937;font-weight:500;
+      transition:background .2s,color .2s,box-shadow .2s;
+    }
+    .nav-link:hover{background:#f1f5f9}
+    .nav-link.active{
+      background:#e6f0ff;color:#1d4ed8;
+      box-shadow:inset 2px 0 0 #3b82f6;
+    }
+
+    /* Modal */
+    .modal{display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,.5);z-index:50;
+      align-items:center;justify-content:center}
+    .modal-content{
+      background:#fff;border-radius:.75rem;
+      width:90%;max-width:650px;padding:1.5rem;
+      max-height:90vh;overflow:auto
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Layout -->
+  <div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+      <div class="p-4 border-b border-gray-200">
+        <h1 class="text-xl font-bold text-blue-600">Hệ thống Bảo trì</h1>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+        <a href="dashboard.html"    class="nav-link"><span>📊</span>Tổng quan</a>
+        <a href="assets.html"       class="nav-link"><span>🏢</span>Tài sản</a>
+        <a href="customers.html"    class="nav-link active"><span>👥</span>Khách hàng</a>
+        <a href="warranties.html"   class="nav-link"><span>🛡️</span>Bảo hành</a>
+        <a href="work-orders.html"  class="nav-link"><span>📋</span>Phiếu công việc</a>
+        <a href="schedules.html"    class="nav-link"><span>📅</span>Lịch bảo trì</a>
+        <a href="incidents.html"    class="nav-link"><span>⚠️</span>Sự cố</a>
+        <a href="inventory.html"    class="nav-link"><span>📦</span>Kho linh kiện</a>
+        <a href="warehouse.html"    class="nav-link"><span>🏪</span>Phiếu kho</a>
+        <a href="employees.html"    class="nav-link"><span>👤</span>Nhân viên</a>
+        <a href="roles.html"        class="nav-link"><span>🔐</span>Phân quyền</a>
+        <a href="checklists.html"   class="nav-link"><span>✅</span>Checklist</a>
+        <a href="logs.html"         class="nav-link"><span>📝</span>Nhật ký</a>
+      </nav>
+
+      <div class="p-4 border-t border-gray-200">
+        <button onclick="logout()" class="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+          Đăng xuất
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 overflow-y-auto">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold">Quản lý Khách hàng</h2>
+          <button onclick="openAddCustomerModal()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            + Thêm khách hàng
+          </button>
+        </div>
+
+        <!-- Search -->
+        <div class="bg-white p-4 rounded-lg shadow mb-6">
+          <input type="text" id="searchCustomer" placeholder="Tìm kiếm khách hàng..."
+            class="w-full px-4 py-2 border border-gray-300 rounded"
+            onkeyup="filterCustomers()">
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã KH</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên khách hàng</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Loại</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Điện thoại</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="customersTableBody">
+              <!-- Dữ liệu sẽ được tải vào đây -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Add/Edit -->
+  <div id="customerModal" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold" id="modalTitle">Thêm khách hàng mới</h3>
+        <button onclick="closeCustomerModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      </div>
+
+      <form id="customerForm" onsubmit="saveCustomer(event)">
+        <input type="hidden" id="customerId">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Mã khách hàng *</label>
+            <input id="customerCode" required class="w-full px-3 py-2 border border-gray-300 rounded">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Tên khách hàng *</label>
+            <input id="customerName" required class="w-full px-3 py-2 border border-gray-300 rounded">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Loại khách hàng *</label>
+            <select id="customerType" required class="w-full px-3 py-2 border border-gray-300 rounded">
+              <option value="Cá nhân">Cá nhân</option>
+              <option value="Doanh nghiệp">Doanh nghiệp</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Điện thoại *</label>
+            <input id="customerPhone" required class="w-full px-3 py-2 border border-gray-300 rounded">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Email</label>
+            <input type="email" id="customerEmail" class="w-full px-3 py-2 border border-gray-300 rounded">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Địa chỉ</label>
+            <textarea id="customerAddress" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Mã số thuế</label>
+            <input id="customerTaxCode" class="w-full px-3 py-2 border border-gray-300 rounded">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Người liên hệ</label>
+            <input id="customerContact" class="w-full px-3 py-2 border border-gray-300 rounded">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium mb-1">Ghi chú</label>
+            <textarea id="customerNotes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded"></textarea>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+          <button type="button" onclick="closeCustomerModal()" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
+            Hủy
+          </button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Lưu
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: View -->
+  <div id="viewCustomerModal" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold">Chi tiết khách hàng</h3>
+        <button onclick="closeViewCustomerModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      </div>
+      <div id="customerDetails" class="space-y-3"></div>
+      <div class="flex justify-end mt-6">
+        <button onclick="closeViewCustomerModal()" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Delete -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content max-w-md">
+      <h3 class="text-xl font-bold mb-4">Xác nhận xóa</h3>
+      <p class="mb-6">Bạn có chắc chắn muốn xóa khách hàng này không?</p>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeDeleteModal()" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">Hủy</button>
+        <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="auth.js"></script>
+  <script src="data.js"></script>
+  <script>
+    checkAuth();
+    let deleteCustomerId = null;
+
+    document.addEventListener('DOMContentLoaded', loadCustomers);
+
+    function loadCustomers(){
+      const list = getData('customers')||[];
+      const tbody = document.getElementById('customersTableBody');
+      tbody.innerHTML = list.map(c=>`
+        <tr class="border-t border-gray-200 hover:bg-gray-50">
+          <td class="px-6 py-4">${c.MaKH}</td>
+          <td class="px-6 py-4 font-medium">${c.TenKH}</td>
+          <td class="px-6 py-4">${c.LoaiKH}</td>
+          <td class="px-6 py-4">${c.DienThoai}</td>
+          <td class="px-6 py-4">${c.Email||'-'}</td>
+          <td class="px-6 py-4">
+            <button onclick="viewCustomer('${c.MaKH}')" class="text-blue-600 hover:text-blue-800 mr-2">Xem</button>
+            <button onclick="editCustomer('${c.MaKH}')" class="text-green-600 hover:text-green-800 mr-2">Sửa</button>
+            <button onclick="deleteCustomer('${c.MaKH}')" class="text-red-600 hover:text-red-800">Xóa</button>
+          </td>
+        </tr>`).join('') || 
+        `<tr><td colspan="6" class="text-center text-gray-500 py-4">Chưa có dữ liệu</td></tr>`;
+    }
+
+    function filterCustomers(){
+      const term = document.getElementById('searchCustomer').value.toLowerCase();
+      const all = getData('customers')||[];
+      const filtered = all.filter(c =>
+        (c.TenKH||'').toLowerCase().includes(term) ||
+        (c.MaKH||'').toLowerCase().includes(term) ||
+        (c.DienThoai||'').includes(term)
+      );
+      const tbody = document.getElementById('customersTableBody');
+      tbody.innerHTML = filtered.map(c=>`
+        <tr class="border-t border-gray-200 hover:bg-gray-50">
+          <td class="px-6 py-4">${c.MaKH}</td>
+          <td class="px-6 py-4 font-medium">${c.TenKH}</td>
+          <td class="px-6 py-4">${c.LoaiKH}</td>
+          <td class="px-6 py-4">${c.DienThoai}</td>
+          <td class="px-6 py-4">${c.Email||'-'}</td>
+          <td class="px-6 py-4">
+            <button onclick="viewCustomer('${c.MaKH}')" class="text-blue-600 hover:text-blue-800 mr-2">Xem</button>
+            <button onclick="editCustomer('${c.MaKH}')" class="text-green-600 hover:text-green-800 mr-2">Sửa</button>
+            <button onclick="deleteCustomer('${c.MaKH}')" class="text-red-600 hover:text-red-800">Xóa</button>
+          </td>
+        </tr>`).join('') || `<tr><td colspan="6" class="text-center text-gray-500 py-4">Không tìm thấy khách hàng</td></tr>`;
+    }
+
+    function openAddCustomerModal(){
+      document.getElementById('modalTitle').textContent='Thêm khách hàng mới';
+      document.getElementById('customerForm').reset();
+      document.getElementById('customerId').value='';
+      document.getElementById('customerCode').disabled=false;
+      document.getElementById('customerModal').style.display='flex';
+    }
+    function closeCustomerModal(){document.getElementById('customerModal').style.display='none';}
+
+    function viewCustomer(id){
+      const list=getData('customers')||[];
+      const c=list.find(x=>x.MaKH===id); if(!c) return;
+      document.getElementById('customerDetails').innerHTML=`
+        <div class="grid grid-cols-2 gap-4">
+          <div><strong>Mã KH:</strong> ${c.MaKH}</div>
+          <div><strong>Tên KH:</strong> ${c.TenKH}</div>
+          <div><strong>Loại:</strong> ${c.LoaiKH}</div>
+          <div><strong>Điện thoại:</strong> ${c.DienThoai}</div>
+          <div><strong>Email:</strong> ${c.Email||'-'}</div>
+          <div><strong>Mã số thuế:</strong> ${c.MaSoThue||'-'}</div>
+          <div class="col-span-2"><strong>Địa chỉ:</strong> ${c.DiaChi||'-'}</div>
+          <div class="col-span-2"><strong>Người liên hệ:</strong> ${c.NguoiLienHe||'-'}</div>
+          <div class="col-span-2"><strong>Ghi chú:</strong> ${c.GhiChu||'-'}</div>
+        </div>`;
+      document.getElementById('viewCustomerModal').style.display='flex';
+    }
+    function closeViewCustomerModal(){document.getElementById('viewCustomerModal').style.display='none';}
+
+    function editCustomer(id){
+      const list=getData('customers')||[];
+      const c=list.find(x=>x.MaKH===id); if(!c) return;
+      document.getElementById('modalTitle').textContent='Chỉnh sửa khách hàng';
+      document.getElementById('customerId').value=c.MaKH;
+      document.getElementById('customerCode').value=c.MaKH;
+      document.getElementById('customerCode').disabled=true;
+      document.getElementById('customerName').value=c.TenKH||'';
+      document.getElementById('customerType').value=c.LoaiKH||'Cá nhân';
+      document.getElementById('customerPhone').value=c.DienThoai||'';
+      document.getElementById('customerEmail').value=c.Email||'';
+      document.getElementById('customerAddress').value=c.DiaChi||'';
+      document.getElementById('customerTaxCode').value=c.MaSoThue||'';
+      document.getElementById('customerContact').value=c.NguoiLienHe||'';
+      document.getElementById('customerNotes').value=c.GhiChu||'';
+      document.getElementById('customerModal').style.display='flex';
+    }
+
+    function saveCustomer(e){
+      e.preventDefault();
+      const id=document.getElementById('customerId').value;
+      const data={
+        MaKH:document.getElementById('customerCode').value.trim(),
+        TenKH:document.getElementById('customerName').value.trim(),
+        LoaiKH:document.getElementById('customerType').value,
+        DienThoai:document.getElementById('customerPhone').value.trim(),
+        Email:document.getElementById('customerEmail').value.trim(),
+        DiaChi:document.getElementById('customerAddress').value.trim(),
+        MaSoThue:document.getElementById('customerTaxCode').value.trim(),
+        NguoiLienHe:document.getElementById('customerContact').value.trim(),
+        GhiChu:document.getElementById('customerNotes').value.trim()
+      };
+      id ? updateData('customers',id,data) : addData('customers',data);
+      closeCustomerModal(); loadCustomers();
+    }
+
+    function deleteCustomer(id){deleteCustomerId=id;document.getElementById('deleteModal').style.display='flex';}
+    function closeDeleteModal(){deleteCustomerId=null;document.getElementById('deleteModal').style.display='none';}
+    function confirmDelete(){
+      if(deleteCustomerId){deleteData('customers',deleteCustomerId);closeDeleteModal();loadCustomers();}
+    }
+
+    window.onclick=e=>{
+      ['customerModal','viewCustomerModal','deleteModal'].forEach(mid=>{
+        if(e.target===document.getElementById(mid))document.getElementById(mid).style.display='none';
+      });
+    };
+  </script>
+</body>
+</html>

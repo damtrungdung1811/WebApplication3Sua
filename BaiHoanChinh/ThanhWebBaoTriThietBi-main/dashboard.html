@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng quan - Hệ thống Quản lý Bảo trì</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50">
+     Sidebar 
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1 class="text-xl font-bold text-blue-600">Quản lý Bảo trì</h1>
+            <p class="text-sm text-gray-600" id="userInfo"></p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item active">
+                <span class="nav-icon">📊</span>
+                Tổng quan
+            </a>
+            <a href="assets.html" class="nav-item">
+                <span class="nav-icon">🏭</span>
+                Tài sản
+            </a>
+            <a href="customers.html" class="nav-item">
+                <span class="nav-icon">👥</span>
+                Khách hàng
+            </a>
+            <a href="warranties.html" class="nav-item">
+                <span class="nav-icon">📋</span>
+                Bảo hành
+            </a>
+            <a href="work-orders.html" class="nav-item">
+                <span class="nav-icon">📝</span>
+                Phiếu công việc
+            </a>
+            <a href="schedules.html" class="nav-item">
+                <span class="nav-icon">📅</span>
+                Lịch bảo trì
+            </a>
+            <a href="incidents.html" class="nav-item">
+                <span class="nav-icon">⚠️</span>
+                Sự cố
+            </a>
+            <a href="inventory.html" class="nav-item">
+                <span class="nav-icon">📦</span>
+                Kho linh kiện
+            </a>
+            <a href="warehouse.html" class="nav-item">
+                <span class="nav-icon">🏪</span>
+                Phiếu kho
+            </a>
+            <a href="checklists.html" class="nav-item">
+                <span class="nav-icon">✅</span>
+                Checklist
+            </a>
+            <a href="employees.html" class="nav-item">
+                <span class="nav-icon">👤</span>
+                Nhân viên
+            </a>
+            <a href="roles.html" class="nav-item">
+                <span class="nav-icon">🔐</span>
+                Phân quyền
+            </a>
+            <a href="logs.html" class="nav-item">
+                <span class="nav-icon">📜</span>
+                Nhật ký
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <button onclick="authManager.logout()" class="w-full btn btn-secondary btn-sm">
+                Đăng xuất
+            </button>
+        </div>
+    </div>
+
+     Main Content 
+    <div class="main-content">
+        <div class="content-header">
+            <h2 class="text-2xl font-bold text-gray-800">Tổng quan hệ thống</h2>
+        </div>
+
+        <div class="content-body">
+             Statistics Cards 
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div class="stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Tổng tài sản</p>
+                            <p class="text-3xl font-bold text-blue-600" id="totalAssets">0</p>
+                        </div>
+                        <div class="text-4xl">🏭</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Công việc đang xử lý</p>
+                            <p class="text-3xl font-bold text-orange-600" id="activeWorkOrders">0</p>
+                        </div>
+                        <div class="text-4xl">📝</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Sự cố chưa xử lý</p>
+                            <p class="text-3xl font-bold text-red-600" id="openIncidents">0</p>
+                        </div>
+                        <div class="text-4xl">⚠️</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Giá trị kho</p>
+                            <p class="text-3xl font-bold text-green-600" id="inventoryValue">0</p>
+                        </div>
+                        <div class="text-4xl">📦</div>
+                    </div>
+                </div>
+            </div>
+
+             Alerts 
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-4 text-red-600">⚠️ Cảnh báo quan trọng</h3>
+                    <div id="criticalAlerts" class="space-y-3">
+                         Alerts will be loaded here 
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="text-lg font-semibold mb-4 text-orange-600">📅 Lịch bảo trì sắp tới</h3>
+                    <div id="upcomingSchedules" class="space-y-3">
+                         Schedules will be loaded here 
+                    </div>
+                </div>
+            </div>
+
+             Recent Activities 
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Hoạt động gần đây</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Loại</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentActivities">
+                             Activities will be loaded here 
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Check authentication
+        authManager.checkAuth();
+
+        // Display user info
+        const user = authManager.getCurrentUser();
+        document.getElementById('userInfo').textContent = `${user.name} (${user.role})`;
+
+        // Load dashboard data
+        function loadDashboard() {
+            const assets = dataManager.getAll('assets');
+            const workOrders = dataManager.getAll('workOrders');
+            const incidents = dataManager.getAll('incidents');
+            const inventory = dataManager.getAll('inventory');
+            const warranties = dataManager.getAll('warranties');
+            const schedules = dataManager.getAll('schedules');
+
+            // Update statistics
+            document.getElementById('totalAssets').textContent = assets.length;
+            document.getElementById('activeWorkOrders').textContent = 
+                workOrders.filter(w => w.trangThai === 'Đang xử lý').length;
+            document.getElementById('openIncidents').textContent = 
+                incidents.filter(i => i.trangThai === 'Đang xử lý').length;
+            
+            const totalValue = inventory.reduce((sum, item) => 
+                sum + (item.soLuongTon * item.donGia), 0);
+            document.getElementById('inventoryValue').textContent = 
+                (totalValue / 1000000).toFixed(1) + 'M';
+
+            // Load critical alerts
+            const alertsHtml = [];
+            
+            // Critical incidents
+            const criticalIncidents = incidents.filter(i => 
+                i.mucDoNghiemTrong === 'Cao' && i.trangThai === 'Đang xử lý'
+            );
+            criticalIncidents.forEach(incident => {
+                alertsHtml.push(`
+                    <div class="alert alert-danger">
+                        <strong>Sự cố nghiêm trọng:</strong> ${incident.moTa}
+                        <br><small>Tài sản: ${dataManager.getAssetName(incident.taiSanId)}</small>
+                    </div>
+                `);
+            });
+
+            // Low stock items
+            const lowStock = inventory.filter(i => i.soLuongTon <= i.soLuongToiThieu);
+            lowStock.forEach(item => {
+                alertsHtml.push(`
+                    <div class="alert alert-warning">
+                        <strong>Tồn kho thấp:</strong> ${item.tenLinhKien}
+                        <br><small>Còn ${item.soLuongTon} ${item.donViTinh}</small>
+                    </div>
+                `);
+            });
+
+            // Expiring warranties
+            const today = new Date();
+            const thirtyDaysLater = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+            const expiringWarranties = warranties.filter(w => {
+                const endDate = new Date(w.ngayKetThuc);
+                return endDate > today && endDate <= thirtyDaysLater;
+            });
+            expiringWarranties.forEach(warranty => {
+                alertsHtml.push(`
+                    <div class="alert alert-warning">
+                        <strong>Bảo hành sắp hết hạn:</strong> ${dataManager.getAssetName(warranty.taiSanId)}
+                        <br><small>Hết hạn: ${warranty.ngayKetThuc}</small>
+                    </div>
+                `);
+            });
+
+            document.getElementById('criticalAlerts').innerHTML = 
+                alertsHtml.length > 0 ? alertsHtml.join('') : '<p class="text-gray-500">Không có cảnh báo</p>';
+
+            // Load upcoming schedules
+            const upcomingSchedulesHtml = schedules
+                .filter(s => s.trangThai === 'Đang hoạt động')
+                .slice(0, 5)
+                .map(schedule => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                        <div>
+                            <p class="font-medium">${dataManager.getAssetName(schedule.taiSanId)}</p>
+                            <p class="text-sm text-gray-600">${schedule.loaiBaoTri} - ${schedule.chuKy}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium">${schedule.ngayBaoTriTiepTheo}</p>
+                            <p class="text-xs text-gray-600">${dataManager.getEmployeeName(schedule.nhanVienPhuTrachId)}</p>
+                        </div>
+                    </div>
+                `).join('');
+            
+            document.getElementById('upcomingSchedules').innerHTML = 
+                upcomingSchedulesHtml || '<p class="text-gray-500">Không có lịch sắp tới</p>';
+
+            // Load recent activities
+            const recentActivitiesHtml = [];
+            
+            // Recent work orders
+            workOrders.slice(-5).reverse().forEach(wo => {
+                recentActivitiesHtml.push(`
+                    <tr>
+                        <td>${wo.ngayBatDau}</td>
+                        <td><span class="badge badge-info">Công việc</span></td>
+                        <td>${wo.maPhieu} - ${dataManager.getAssetName(wo.taiSanId)}</td>
+                        <td><span class="badge ${wo.trangThai === 'Hoàn thành' ? 'badge-success' : 'badge-warning'}">${wo.trangThai}</span></td>
+                    </tr>
+                `);
+            });
+
+            // Recent incidents
+            incidents.slice(-3).reverse().forEach(incident => {
+                recentActivitiesHtml.push(`
+                    <tr>
+                        <td>${incident.ngayBaoCao}</td>
+                        <td><span class="badge badge-danger">Sự cố</span></td>
+                        <td>${incident.maPhieu} - ${incident.moTa}</td>
+                        <td><span class="badge ${incident.trangThai === 'Đã xử lý' ? 'badge-success' : 'badge-warning'}">${incident.trangThai}</span></td>
+                    </tr>
+                `);
+            });
+
+            document.getElementById('recentActivities').innerHTML = recentActivitiesHtml.join('');
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>

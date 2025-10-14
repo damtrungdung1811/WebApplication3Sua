@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nhật ký Hệ thống - Hệ thống Bảo trì</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* ===== STYLE SIDEBAR CHUẨN ===== */
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      color: #374151;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .nav-link:hover {
+      background-color: #f3f4f6;
+      color: #2563eb;
+    }
+    .nav-link.active {
+      background-color: #e0f2fe;
+      color: #2563eb;
+      font-weight: 600;
+      box-shadow: inset 2px 0 0 0 #2563eb;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+      <div class="p-6 border-b border-gray-200">
+        <h1 class="text-2xl font-bold text-blue-600">Hệ thống Bảo trì</h1>
+      </div>
+
+      <nav class="flex-1 p-4 overflow-y-auto space-y-1">
+        <a href="dashboard.html" class="nav-link">📊 Tổng quan</a>
+        <a href="assets.html" class="nav-link">🏢 Tài sản</a>
+        <a href="customers.html" class="nav-link">👥 Khách hàng</a>
+        <a href="warranties.html" class="nav-link">🛡️ Bảo hành</a>
+        <a href="work-orders.html" class="nav-link">📋 Phiếu công việc</a>
+        <a href="schedules.html" class="nav-link">📅 Lịch bảo trì</a>
+        <a href="incidents.html" class="nav-link">⚠️ Sự cố</a>
+        <a href="inventory.html" class="nav-link">🔧 Kho linh kiện</a>
+        <a href="warehouse.html" class="nav-link">📦 Phiếu kho</a>
+        <a href="employees.html" class="nav-link">👨‍💼 Nhân viên</a>
+        <a href="roles.html" class="nav-link">🔐 Phân quyền</a>
+        <a href="checklists.html" class="nav-link">✅ Checklist</a>
+        <a href="logs.html" class="nav-link active">📝 Nhật ký</a>
+      </nav>
+
+      <div class="p-4 border-t border-gray-200">
+        <button
+          onclick="logout()"
+          class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 font-medium"
+        >
+          Đăng xuất
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+      <div class="p-8">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6">Nhật ký Hệ thống</h2>
+
+        <!-- Filter -->
+        <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+          <h3 class="text-lg font-semibold mb-4">Lọc</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Tìm kiếm..."
+              class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              id="actionFilter"
+              class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Tất cả hành động</option>
+              <option value="Thêm">Thêm</option>
+              <option value="Sửa">Sửa</option>
+              <option value="Xóa">Xóa</option>
+              <option value="Đăng nhập">Đăng nhập</option>
+              <option value="Đăng xuất">Đăng xuất</option>
+            </select>
+            <input
+              type="date"
+              id="dateFilter"
+              class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Logs Table -->
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Thời gian
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Người dùng
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Hành động
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Mô tả
+                </th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody" class="divide-y divide-gray-200">
+              <tr>
+                <td colspan="4" class="text-center py-8 text-gray-500">
+                  Chưa có dữ liệu
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="logs.js"></script>
+</body>
+</html>

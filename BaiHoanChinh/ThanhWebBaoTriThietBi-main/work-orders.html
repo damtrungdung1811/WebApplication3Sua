@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiếu Công việc - Hệ thống Bảo trì</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50">
+     Sidebar 
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1 class="text-xl font-bold text-blue-600">Hệ thống Bảo trì</h1>
+            <p class="text-sm text-gray-600" id="userInfo"></p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span> Tổng quan</a>
+            <a href="assets.html" class="nav-item"><span class="nav-icon">🏭</span> Tài sản</a>
+            <a href="customers.html" class="nav-item"><span class="nav-icon">👥</span> Khách hàng</a>
+            <a href="warranties.html" class="nav-item"><span class="nav-icon">🛡️</span> Bảo hành</a>
+            <a href="work-orders.html" class="nav-item active"><span class="nav-icon">📝</span> Phiếu công việc</a>
+            <a href="schedules.html" class="nav-item"><span class="nav-icon">📅</span> Lịch bảo trì</a>
+            <a href="incidents.html" class="nav-item"><span class="nav-icon">⚠️</span> Sự cố</a>
+            <a href="inventory.html" class="nav-item"><span class="nav-icon">📦</span> Kho linh kiện</a>
+            <a href="warehouse.html" class="nav-item"><span class="nav-icon">🏪</span> Phiếu kho</a>
+            <a href="employees.html" class="nav-item"><span class="nav-icon">👤</span> Nhân viên</a>
+            <a href="roles.html" class="nav-item"><span class="nav-icon">🔐</span> Phân quyền</a>
+            <a href="checklists.html" class="nav-item"><span class="nav-icon">✅</span> Checklist</a>
+            <a href="logs.html" class="nav-item"><span class="nav-icon">📜</span> Nhật ký</a>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <button onclick="authManager.logout()" class="w-full btn btn-secondary btn-sm">Đăng xuất</button>
+        </div>
+    </div>
+
+     Main Content 
+    <div class="main-content">
+        <div class="content-header">
+            <h2 class="text-2xl font-bold text-gray-800">Quản lý Phiếu Công việc</h2>
+            <button onclick="openAddModal()" class="btn btn-primary">+ Thêm phiếu</button>
+        </div>
+
+        <div class="content-body">
+             Search and Filter 
+            <div class="card mb-6">
+                <div class="flex gap-4">
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm phiếu công việc..." 
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg" onkeyup="filterData()">
+                    <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg" onchange="filterData()">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Chờ xử lý">Chờ xử lý</option>
+                        <option value="Đang xử lý">Đang xử lý</option>
+                        <option value="Hoàn thành">Hoàn thành</option>
+                        <option value="Hủy">Hủy</option>
+                    </select>
+                </div>
+            </div>
+
+             Table 
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã phiếu</th>
+                                <th>Tài sản</th>
+                                <th>Loại công việc</th>
+                                <th>Nhân viên</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Ưu tiên</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     Add/Edit Modal 
+    <div id="modal" class="modal">
+        <div class="modal-content" style="max-width: 600px; padding: 2rem;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold" id="modalTitle">Thêm phiếu công việc</h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <form id="dataForm" onsubmit="saveData(event)" class="space-y-4">
+                <input type="hidden" id="editId">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Mã phiếu *</label>
+                    <input type="text" id="maPhieu" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Tài sản *</label>
+                    <select id="taiSanId" required class="w-full px-3 py-2 border border-gray-300 rounded-lg"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Loại công việc *</label>
+                    <select id="loaiCongViec" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        <option value="Bảo trì định kỳ">Bảo trì định kỳ</option>
+                        <option value="Sửa chữa">Sửa chữa</option>
+                        <option value="Kiểm tra">Kiểm tra</option>
+                        <option value="Lắp đặt">Lắp đặt</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Nhân viên phụ trách *</label>
+                    <select id="nhanVienId" required class="w-full px-3 py-2 border border-gray-300 rounded-lg"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Ngày bắt đầu *</label>
+                        <input type="date" id="ngayBatDau" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Ngày kết thúc</label>
+                        <input type="date" id="ngayKetThuc" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Mức độ ưu tiên *</label>
+                    <select id="mucDoUuTien" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        <option value="Thấp">Thấp</option>
+                        <option value="Trung bình">Trung bình</option>
+                        <option value="Cao">Cao</option>
+                        <option value="Khẩn cấp">Khẩn cấp</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Trạng thái *</label>
+                    <select id="trangThai" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        <option value="Chờ xử lý">Chờ xử lý</option>
+                        <option value="Đang xử lý">Đang xử lý</option>
+                        <option value="Hoàn thành">Hoàn thành</option>
+                        <option value="Hủy">Hủy</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Chi phí (VNĐ)</label>
+                    <input type="number" id="chiPhi" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Mô tả</label>
+                    <textarea id="moTa" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Hủy</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+     Delete Modal 
+    <div id="deleteModal" class="modal">
+        <div class="modal-content" style="max-width: 400px; padding: 2rem;">
+            <h3 class="text-xl font-bold mb-4">Xác nhận xóa</h3>
+            <p class="mb-6">Bạn có chắc chắn muốn xóa phiếu công việc này?</p>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Hủy</button>
+                <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="data.js"></script>
+    <script>
+        authManager.checkAuth();
+        const user = authManager.getCurrentUser();
+        document.getElementById('userInfo').textContent = `${user.name} (${user.role})`;
+
+        let deleteId = null;
+        let allData = [];
+        let filteredData = [];
+
+        function loadData() {
+            allData = dataManager.getAll('workOrders');
+            filteredData = [...allData];
+            renderTable();
+            loadSelects();
+        }
+
+        function loadSelects() {
+            const assets = dataManager.getAll('assets');
+            const employees = dataManager.getAll('employees');
+            
+            const assetSelect = document.getElementById('taiSanId');
+            assetSelect.innerHTML = '<option value="">Chọn tài sản</option>' + 
+                assets.map(a => `<option value="${a.id}">${a.maTaiSan} - ${a.tenTaiSan}</option>`).join('');
+            
+            const empSelect = document.getElementById('nhanVienId');
+            empSelect.innerHTML = '<option value="">Chọn nhân viên</option>' + 
+                employees.map(e => `<option value="${e.id}">${e.hoTen}</option>`).join('');
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-500">Không có dữ liệu</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredData.map(item => {
+                const asset = dataManager.getById('assets', item.taiSanId);
+                const employee = dataManager.getById('employees', item.nhanVienId);
+                const statusColors = {
+                    'Chờ xử lý': 'badge-secondary',
+                    'Đang xử lý': 'badge-warning',
+                    'Hoàn thành': 'badge-success',
+                    'Hủy': 'badge-danger'
+                };
+                const priorityColors = {
+                    'Thấp': 'badge-info',
+                    'Trung bình': 'badge-secondary',
+                    'Cao': 'badge-warning',
+                    'Khẩn cấp': 'badge-danger'
+                };
+                return `
+                    <tr>
+                        <td class="font-medium">${item.maPhieu}</td>
+                        <td>${asset ? asset.tenTaiSan : 'N/A'}</td>
+                        <td>${item.loaiCongViec}</td>
+                        <td>${employee ? employee.hoTen : 'N/A'}</td>
+                        <td>${item.ngayBatDau}</td>
+                        <td><span class="badge ${priorityColors[item.mucDoUuTien]}">${item.mucDoUuTien}</span></td>
+                        <td><span class="badge ${statusColors[item.trangThai]}">${item.trangThai}</span></td>
+                        <td>
+                            <button onclick="editData(${item.id})" class="text-blue-600 hover:text-blue-800 mr-2">Sửa</button>
+                            <button onclick="deleteData(${item.id})" class="text-red-600 hover:text-red-800">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterData() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            
+            filteredData = allData.filter(item => {
+                const matchSearch = item.maPhieu.toLowerCase().includes(search) || 
+                                  item.moTa?.toLowerCase().includes(search);
+                const matchStatus = !status || item.trangThai === status;
+                return matchSearch && matchStatus;
+            });
+            renderTable();
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Thêm phiếu công việc';
+            document.getElementById('dataForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function editData(id) {
+            const item = dataManager.getById('workOrders', id);
+            if (item) {
+                document.getElementById('modalTitle').textContent = 'Chỉnh sửa phiếu công việc';
+                document.getElementById('editId').value = item.id;
+                document.getElementById('maPhieu').value = item.maPhieu;
+                document.getElementById('taiSanId').value = item.taiSanId;
+                document.getElementById('loaiCongViec').value = item.loaiCongViec;
+                document.getElementById('nhanVienId').value = item.nhanVienId;
+                document.getElementById('ngayBatDau').value = item.ngayBatDau;
+                document.getElementById('ngayKetThuc').value = item.ngayKetThuc || '';
+                document.getElementById('mucDoUuTien').value = item.mucDoUuTien;
+                document.getElementById('trangThai').value = item.trangThai;
+                document.getElementById('chiPhi').value = item.chiPhi || '';
+                document.getElementById('moTa').value = item.moTa || '';
+                document.getElementById('modal').style.display = 'flex';
+            }
+        }
+
+        function saveData(e) {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const data = {
+                maPhieu: document.getElementById('maPhieu').value,
+                taiSanId: parseInt(document.getElementById('taiSanId').value),
+                loaiCongViec: document.getElementById('loaiCongViec').value,
+                nhanVienId: parseInt(document.getElementById('nhanVienId').value),
+                ngayBatDau: document.getElementById('ngayBatDau').value,
+                ngayKetThuc: document.getElementById('ngayKetThuc').value || null,
+                mucDoUuTien: document.getElementById('mucDoUuTien').value,
+                trangThai: document.getElementById('trangThai').value,
+                chiPhi: parseFloat(document.getElementById('chiPhi').value) || 0,
+                moTa: document.getElementById('moTa').value
+            };
+
+            if (id) {
+                dataManager.update('workOrders', id, data);
+            } else {
+                dataManager.create('workOrders', data);
+            }
+            closeModal();
+            loadData();
+        }
+
+        function deleteData(id) {
+            deleteId = id;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            deleteId = null;
+        }
+
+        function confirmDelete() {
+            if (deleteId) {
+                dataManager.delete('workOrders', deleteId);
+                closeDeleteModal();
+                loadData();
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lịch Bảo trì - Hệ thống Bảo trì</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ===== ẨN DÒNG “Sidebar / Main Content” nếu xuất hiện ===== */
+    body > div::before,
+    body > div::after {
+      content: none !important;
+    }
+
+    /* ===== STYLE MODAL ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal.show {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* ===== STYLE LINK SIDEBAR ===== */
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      color: #374151;
+      transition: all 0.2s ease;
+    }
+    .nav-link:hover {
+      background-color: #f3f4f6;
+    }
+    .nav-link.active {
+      background-color: #e0f2fe;
+      color: #2563eb;
+      font-weight: 600;
+      box-shadow: inset 0 0 0 1px #bfdbfe;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+      <div class="p-6 border-b border-gray-200">
+        <h1 class="text-2xl font-bold text-blue-600">Hệ thống Bảo trì</h1>
+      </div>
+      <nav class="flex-1 p-4 overflow-y-auto space-y-1">
+        <a href="dashboard.html" class="nav-link">📊 Tổng quan</a>
+        <a href="assets.html" class="nav-link">🏢 Tài sản</a>
+        <a href="customers.html" class="nav-link">👥 Khách hàng</a>
+        <a href="warranties.html" class="nav-link">🛡️ Bảo hành</a>
+        <a href="work-orders.html" class="nav-link">📋 Phiếu công việc</a>
+        <a href="schedules.html" class="nav-link active">📅 Lịch bảo trì</a>
+        <a href="incidents.html" class="nav-link">⚠️ Sự cố</a>
+        <a href="inventory.html" class="nav-link">🔧 Kho linh kiện</a>
+        <a href="warehouse.html" class="nav-link">📦 Phiếu kho</a>
+        <a href="employees.html" class="nav-link">👤 Nhân viên</a>
+        <a href="roles.html" class="nav-link">🔐 Phân quyền</a>
+        <a href="checklists.html" class="nav-link">✅ Checklist</a>
+        <a href="logs.html" class="nav-link">📝 Nhật ký</a>
+      </nav>
+      <div class="p-4 border-t border-gray-200">
+        <button onclick="logout()" class="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+          Đăng xuất
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+      <div class="p-8">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-3xl font-bold text-gray-800">Quản lý Lịch Bảo trì</h2>
+          <button onclick="openAddModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+            + Thêm lịch bảo trì
+          </button>
+        </div>
+
+        <div id="alerts" class="mb-6"></div>
+
+        <!-- Search and Filter -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <h3 class="text-lg font-semibold mb-4">Tìm kiếm và Lọc</h3>
+          <div class="flex gap-4">
+            <input id="searchInput" type="text" placeholder="Tìm kiếm lịch bảo trì..."
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+              <option value="">Tất cả trạng thái</option>
+              <option value="Đang hoạt động">Đang hoạt động</option>
+              <option value="Tạm dừng">Tạm dừng</option>
+              <option value="Hoàn thành">Hoàn thành</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Schedules Table -->
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã lịch</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tài sản</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Loại bảo trì</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Chu kỳ</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lần bảo trì tiếp theo</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="schedulesTableBody" class="divide-y divide-gray-200">
+              <!-- Data will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div id="scheduleModal" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="modalTitle" class="text-xl font-bold">Thêm Lịch Bảo trì</h3>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      </div>
+      <form id="scheduleForm" class="space-y-4">
+        <input type="hidden" id="scheduleId">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tài sản</label>
+          <select id="assetId" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="">Chọn tài sản</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Loại bảo trì</label>
+          <select id="maintenanceType" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="Định kỳ">Định kỳ</option>
+            <option value="Dự phòng">Dự phòng</option>
+            <option value="Khẩn cấp">Khẩn cấp</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Chu kỳ (ngày)</label>
+          <input type="number" id="cycle" required min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu</label>
+          <input type="date" id="startDate" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+          <textarea id="description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+          <select id="status" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="Đang hoạt động">Đang hoạt động</option>
+            <option value="Tạm dừng">Tạm dừng</option>
+            <option value="Hoàn thành">Hoàn thành</option>
+          </select>
+        </div>
+        <div class="flex gap-3 pt-4">
+          <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Lưu</button>
+          <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">Hủy</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content max-w-md">
+      <h3 class="text-xl font-bold mb-4">Xác nhận xóa</h3>
+      <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa lịch bảo trì này?</p>
+      <div class="flex gap-3">
+        <button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700">Xóa</button>
+        <button onclick="closeDeleteModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">Hủy</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="data.js"></script>
+  <script>
+    let schedules = [], assets = [], deleteId = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      loadData();
+      loadAssets();
+      setupEventListeners();
+      checkUpcomingSchedules();
+    });
+
+    function loadData() {
+      schedules = getSchedules();
+      renderTable();
+    }
+
+    function loadAssets() {
+      assets = getAssets();
+      const assetSelect = document.getElementById('assetId');
+      assetSelect.innerHTML = '<option value="">Chọn tài sản</option>';
+      assets.forEach(a => assetSelect.innerHTML += `<option value="${a.id}">${a.tenTaiSan}</option>`);
+    }
+
+    function setupEventListeners() {
+      document.getElementById('searchInput').addEventListener('input', renderTable);
+      document.getElementById('statusFilter').addEventListener('change', renderTable);
+      document.getElementById('scheduleForm').addEventListener('submit', handleSubmit);
+    }
+
+    function checkUpcomingSchedules() {
+      const today = new Date();
+      const upcoming = schedules.filter(s => {
+        const next = new Date(s.lanBaoTriTiepTheo);
+        const diff = Math.ceil((next - today) / (1000 * 60 * 60 * 24));
+        return diff >= 0 && diff <= 7 && s.trangThai === 'Đang hoạt động';
+      });
+      if (upcoming.length) {
+        document.getElementById('alerts').innerHTML = `
+          <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+            <p class="text-sm text-yellow-700">
+              ⚠️ Có ${upcoming.length} lịch bảo trì sắp đến hạn trong 7 ngày tới!
+            </p>
+          </div>`;
+      }
+    }
+
+    function renderTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const filter = document.getElementById('statusFilter').value;
+      let filtered = schedules.filter(s =>
+        (s.maLichBaoTri.toLowerCase().includes(q) || s.moTa.toLowerCase().includes(q)) &&
+        (!filter || s.trangThai === filter)
+      );
+      const tbody = document.getElementById('schedulesTableBody');
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">Không có dữ liệu</td></tr>';
+        return;
+      }
+      tbody.innerHTML = filtered.map(s => {
+        const asset = assets.find(a => a.id === s.maTaiSan);
+        const name = asset ? asset.tenTaiSan : 'N/A';
+        const colors = {
+          'Đang hoạt động': 'bg-green-100 text-green-800',
+          'Tạm dừng': 'bg-yellow-100 text-yellow-800',
+          'Hoàn thành': 'bg-gray-100 text-gray-800'
+        };
+        return `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 text-sm">${s.maLichBaoTri}</td>
+          <td class="px-6 py-4 text-sm">${name}</td>
+          <td class="px-6 py-4 text-sm">${s.loaiBaoTri}</td>
+          <td class="px-6 py-4 text-sm">${s.chuKy} ngày</td>
+          <td class="px-6 py-4 text-sm">${new Date(s.lanBaoTriTiepTheo).toLocaleDateString('vi-VN')}</td>
+          <td class="px-6 py-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${colors[s.trangThai]}">${s.trangThai}</span></td>
+          <td class="px-6 py-4 text-sm">
+            <button onclick="editSchedule('${s.id}')" class="text-blue-600 hover:text-blue-800 mr-3">Sửa</button>
+            <button onclick="openDeleteModal('${s.id}')" class="text-red-600 hover:text-red-800">Xóa</button>
+          </td>
+        </tr>`; }).join('');
+    }
+
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Thêm Lịch Bảo trì';
+      document.getElementById('scheduleForm').reset();
+      document.getElementById('scheduleId').value = '';
+      document.getElementById('scheduleModal').classList.add('show');
+    }
+
+    function editSchedule(id) {
+      const s = schedules.find(x => x.id === id);
+      if (!s) return;
+      document.getElementById('modalTitle').textContent = 'Chỉnh sửa Lịch Bảo trì';
+      document.getElementById('scheduleId').value = s.id;
+      document.getElementById('assetId').value = s.maTaiSan;
+      document.getElementById('maintenanceType').value = s.loaiBaoTri;
+      document.getElementById('cycle').value = s.chuKy;
+      document.getElementById('startDate').value = s.ngayBatDau;
+      document.getElementById('description').value = s.moTa;
+      document.getElementById('status').value = s.trangThai;
+      document.getElementById('scheduleModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('scheduleModal').classList.remove('show');
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('scheduleId').value;
+      const form = {
+        maTaiSan: document.getElementById('assetId').value,
+        loaiBaoTri: document.getElementById('maintenanceType').value,
+        chuKy: parseInt(document.getElementById('cycle').value),
+        ngayBatDau: document.getElementById('startDate').value,
+        moTa: document.getElementById('description').value,
+        trangThai: document.getElementById('status').value
+      };
+      id ? updateSchedule(id, form) : addSchedule(form);
+      closeModal();
+      loadData();
+    }
+
+    function openDeleteModal(id) {
+      deleteId = id;
+      document.getElementById('deleteModal').classList.add('show');
+    }
+
+    function closeDeleteModal() {
+      deleteId = null;
+      document.getElementById('deleteModal').classList.remove('show');
+    }
+
+    function confirmDelete() {
+      if (deleteId) deleteSchedule(deleteId);
+      closeDeleteModal();
+      loadData();
+    }
+
+    window.onclick = e => {
+      if (e.target === document.getElementById('scheduleModal')) closeModal();
+      if (e.target === document.getElementById('deleteModal')) closeDeleteModal();
+    };
+  </script>
+</body>
+</html>
