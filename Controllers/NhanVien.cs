@@ -16,113 +16,218 @@ namespace WebApplication3.Controllers
             _context = context;
         }
 
-        // 🔹 GET: api/NhanVien/get-all
+        // ===================== 🔹 GET ALL =====================
+        // GET: api/NhanVien/get-all
         [HttpGet("get-all")]
-        public async Task<ActionResult<IEnumerable<NhanVien>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return await _context.NhanViens.ToListAsync();
+            try
+            {
+                var list = await _context.NhanViens.ToListAsync();
+                if (list == null || list.Count == 0)
+                    return NotFound(new { message = "Không có nhân viên nào trong hệ thống!" });
+
+                return Ok(new
+                {
+                    message = "Lấy danh sách nhân viên thành công!",
+                    data = list
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi lấy danh sách nhân viên!", error = ex.Message });
+            }
         }
 
-        // 🔹 GET: api/NhanVien/get/5
+        // ===================== 🔹 GET BY ID =====================
+        // GET: api/NhanVien/get/5
         [HttpGet("get/{id}")]
-        public async Task<ActionResult<NhanVien>> GetNhanVien(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var nv = await _context.NhanViens.FindAsync(id);
-            if (nv == null)
-                return NotFound(new { message = "Không tìm thấy nhân viên" });
+            try
+            {
+                var nv = await _context.NhanViens.FindAsync(id);
+                if (nv == null)
+                    return NotFound(new { message = $"Không tìm thấy nhân viên có ID = {id}" });
 
-            return nv;
+                return Ok(new { message = "Lấy thông tin nhân viên thành công!", data = nv });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi lấy thông tin nhân viên!", error = ex.Message });
+            }
         }
 
-        // 🔹 POST: api/NhanVien/create
+        // ===================== 🔹 CREATE =====================
+        // POST: api/NhanVien/create
         [HttpPost("create")]
-        public async Task<ActionResult<NhanVien>> Create(NhanVien nv)
+        public async Task<IActionResult> Create([FromBody] NhanVien nv)
         {
-            _context.NhanViens.Add(nv);
-            await _context.SaveChangesAsync();
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(new { message = "Dữ liệu không hợp lệ!", errors = ModelState.Values });
 
-            return CreatedAtAction(nameof(GetNhanVien), new { id = nv.MaNV }, nv);
+                _context.NhanViens.Add(nv);
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    message = "Thêm nhân viên thành công!",
+                    data = nv
+                });
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Lỗi khi thêm nhân viên (có thể trùng khóa hoặc vi phạm ràng buộc)!",
+                    error = ex.InnerException?.Message ?? ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi không xác định khi thêm nhân viên!", error = ex.Message });
+            }
         }
 
-        // 🔹 PUT: api/NhanVien/update/5
+        // ===================== 🔹 UPDATE =====================
+        // PUT: api/NhanVien/update/5
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> Update(int id, NhanVien nv)
+        public async Task<IActionResult> Update(int id, [FromBody] NhanVien nv)
         {
             if (id != nv.MaNV)
-                return BadRequest(new { message = "ID không khớp" });
-
-            _context.Entry(nv).State = EntityState.Modified;
+                return BadRequest(new { message = "ID trong URL không khớp với ID trong dữ liệu gửi lên!" });
 
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.NhanViens.Any(e => e.MaNV == id))
-                    return NotFound(new { message = "Không tìm thấy nhân viên" });
-                else
-                    throw;
-            }
+                var existing = await _context.NhanViens.FindAsync(id);
+                if (existing == null)
+                    return NotFound(new { message = $"Không tìm thấy nhân viên có ID = {id}" });
 
-            return Ok(new { message = "Cập nhật thành công" });
+                // Cập nhật thủ công các trường cần thiết (tránh lỗi tracking)
+                _context.Entry(existing).CurrentValues.SetValues(nv);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Cập nhật nhân viên thành công!", data = nv });
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return StatusCode(500, new { message = "Lỗi xung đột dữ liệu khi cập nhật!", error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi không xác định khi cập nhật nhân viên!", error = ex.Message });
+            }
         }
 
-        // 🔹 DELETE: api/NhanVien/delete/5
+        // ===================== 🔹 DELETE =====================
+        // DELETE: api/NhanVien/delete/5
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var nv = await _context.NhanViens.FindAsync(id);
-            if (nv == null)
-                return NotFound(new { message = "Không tìm thấy nhân viên" });
+            try
+            {
+                var nv = await _context.NhanViens.FindAsync(id);
+                if (nv == null)
+                    return NotFound(new { message = $"Không tìm thấy nhân viên có ID = {id}" });
 
-            _context.NhanViens.Remove(nv);
-            await _context.SaveChangesAsync();
+                _context.NhanViens.Remove(nv);
+                await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Xóa thành công" });
+                return Ok(new { message = "Xóa nhân viên thành công!", deletedId = id });
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Không thể xóa nhân viên này (có thể đang được tham chiếu ở bảng khác)!",
+                    error = ex.InnerException?.Message ?? ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi không xác định khi xóa nhân viên!", error = ex.Message });
+            }
         }
-        // 🔹 KPI 1: Đếm số nhân viên đang hoạt động
-        [HttpGet("api/hoat-dong")]
+
+        // ===================== 🔹 KPI 1: Số nhân viên hoạt động =====================
+        // GET: api/NhanVien/kpi/hoat-dong
+        [HttpGet("kpi/hoat-dong")]
         public async Task<IActionResult> GetSoNhanVienHoatDong()
         {
-            var count = await _context.NhanViens
-                                      .Where(nv => nv.TrangThai == "Hoạt động")
-                                      .CountAsync();
+            try
+            {
+                var count = await _context.NhanViens
+                    .Where(nv => nv.TrangThai == "Hoạt động")
+                    .CountAsync();
 
-            return Ok(new { SoNhanVienHoatDong = count });
+                return Ok(new
+                {
+                    message = "Thống kê thành công!",
+                    soNhanVienHoatDong = count
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi thống kê nhân viên hoạt động!", error = ex.Message });
+            }
         }
 
-        // 🔹 KPI 2: Đếm số phiếu công việc được phân công cho từng nhân viên
-        [HttpGet("api/phieu-cong-viec")]
+        // ===================== 🔹 KPI 2: Phiếu công việc mỗi nhân viên =====================
+        // GET: api/NhanVien/kpi/phieu-cong-viec
+        [HttpGet("kpi/phieu-cong-viec")]
         public async Task<IActionResult> GetNhanVienPhieuCongViec()
         {
-            var result = await _context.NhanViens
-                .Select(nv => new
-                {
-                    nv.MaNV,
-                    nv.HoTen,
-                    SoPhieuCongViec = _context.PhieuCongViecs.Count(pcv => pcv.MaNV_PhanCong == nv.MaNV)
-                })
-                .ToListAsync();
+            try
+            {
+                var result = await _context.NhanViens
+                    .Select(nv => new
+                    {
+                        nv.MaNV,
+                        nv.HoTen,
+                        SoPhieuCongViec = _context.PhieuCongViecs.Count(pcv => pcv.MaNV_PhanCong == nv.MaNV)
+                    })
+                    .ToListAsync();
 
-            return Ok(result);
+                return Ok(new
+                {
+                    message = "Thống kê phiếu công việc theo nhân viên thành công!",
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi thống kê phiếu công việc!", error = ex.Message });
+            }
         }
 
-        // 🔹 KPI 3: Đếm số phiếu sự cố mà nhân viên tiếp nhận
+        // ===================== 🔹 KPI 3: Số phiếu sự cố đã tiếp nhận =====================
+        // GET: api/NhanVien/kpi/su-co
         [HttpGet("kpi/su-co")]
         public async Task<IActionResult> GetNhanVienSuCo()
         {
-            var result = await _context.NhanViens
-                .Select(nv => new
+            try
+            {
+                var result = await _context.NhanViens
+                    .Select(nv => new
+                    {
+                        nv.MaNV,
+                        nv.HoTen,
+                        SoSuCoTiepNhan = _context.PhieuSuCos.Count(sc => sc.MaNV_TiepNhan == nv.MaNV)
+                    })
+                    .ToListAsync();
+
+                return Ok(new
                 {
-                    nv.MaNV,
-                    nv.HoTen,
-                    SoSuCoTiepNhan = _context.PhieuSuCos.Count(sc => sc.MaNV_TiepNhan == nv.MaNV)
-                })
-                .ToListAsync();
-
-            return Ok(result);
+                    message = "Thống kê phiếu sự cố theo nhân viên thành công!",
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi thống kê phiếu sự cố!", error = ex.Message });
+            }
         }
-
     }
 }
