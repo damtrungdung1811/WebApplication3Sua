@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật ký Hệ thống - Hệ thống Bảo trì</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="logs.css">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+         Sidebar 
+        <aside class="w-64 bg-white shadow-md">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-blue-600">Hệ thống Bảo trì</h1>
+            </div>
+            <nav class="mt-6">
+                <a href="dashboard.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">📊 Tổng quan</a>
+                <a href="assets.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">🏢 Tài sản</a>
+                <a href="customers.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">👥 Khách hàng</a>
+                <a href="warranties.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">🛡️ Bảo hành</a>
+                <a href="work-orders.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">📋 Phiếu công việc</a>
+                <a href="schedules.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">📅 Lịch bảo trì</a>
+                <a href="incidents.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">⚠️ Sự cố</a>
+                <a href="inventory.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">🔧 Kho linh kiện</a>
+                <a href="warehouse.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">📦 Phiếu kho</a>
+                <a href="employees.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">👨‍💼 Nhân viên</a>
+                <a href="roles.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">🔐 Phân quyền</a>
+                <a href="checklists.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">✅ Checklist</a>
+                <a href="logs.html" class="block px-6 py-3 bg-blue-50 text-blue-600 border-r-4 border-blue-600">📝 Nhật ký</a>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-6">
+                <button onclick="logout()" class="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Đăng xuất</button>
+            </div>
+        </aside>
+
+         Main Content 
+        <main class="flex-1 overflow-y-auto">
+            <div class="p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Nhật ký Hệ thống</h2>
+
+                 Filter 
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <h3 class="text-lg font-semibold mb-4">Lọc</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm..." class="border border-gray-300 rounded-lg px-4 py-2">
+                        <select id="actionFilter" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="">Tất cả hành động</option>
+                            <option value="Thêm">Thêm</option>
+                            <option value="Sửa">Sửa</option>
+                            <option value="Xóa">Xóa</option>
+                            <option value="Đăng nhập">Đăng nhập</option>
+                            <option value="Đăng xuất">Đăng xuất</option>
+                        </select>
+                        <input type="date" id="dateFilter" class="border border-gray-300 rounded-lg px-4 py-2">
+                    </div>
+                </div>
+
+                 Logs Table 
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Người dùng</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody" class="bg-white divide-y divide-gray-200">
+                             Data will be loaded here 
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="logs.js"></script>
+</body>
+</html>

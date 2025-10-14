@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Tài sản - Hệ thống Bảo trì</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50">
+     Sidebar 
+    <div class="flex h-screen">
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-blue-600">Hệ thống Bảo trì</h1>
+            </div>
+            <nav class="flex-1 overflow-y-auto p-4">
+                <a href="dashboard.html" class="nav-link">
+                    <span>📊</span> Tổng quan
+                </a>
+                <a href="assets.html" class="nav-link active">
+                    <span>🏢</span> Tài sản
+                </a>
+                <a href="customers.html" class="nav-link">
+                    <span>👥</span> Khách hàng
+                </a>
+                <a href="warranties.html" class="nav-link">
+                    <span>🛡️</span> Bảo hành
+                </a>
+                <a href="work-orders.html" class="nav-link">
+                    <span>📋</span> Phiếu công việc
+                </a>
+                <a href="schedules.html" class="nav-link">
+                    <span>📅</span> Lịch bảo trì
+                </a>
+                <a href="incidents.html" class="nav-link">
+                    <span>⚠️</span> Sự cố
+                </a>
+                <a href="inventory.html" class="nav-link">
+                    <span>📦</span> Kho linh kiện
+                </a>
+                <a href="warehouse.html" class="nav-link">
+                    <span>🏪</span> Phiếu kho
+                </a>
+                <a href="employees.html" class="nav-link">
+                    <span>👤</span> Nhân viên
+                </a>
+                <a href="roles.html" class="nav-link">
+                    <span>🔐</span> Phân quyền
+                </a>
+                <a href="checklists.html" class="nav-link">
+                    <span>✅</span> Checklist
+                </a>
+                <a href="logs.html" class="nav-link">
+                    <span>📝</span> Nhật ký
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <button onclick="logout()" class="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                    Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+         Main Content 
+        <main class="flex-1 overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Quản lý Tài sản</h2>
+                    <button onclick="openAddAssetModal()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        + Thêm tài sản
+                    </button>
+                </div>
+
+                 Search and Filter 
+                <div class="bg-white p-4 rounded-lg shadow mb-6">
+                    <div class="flex gap-4">
+                        <input type="text" id="searchAsset" placeholder="Tìm kiếm tài sản..." 
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded"
+                               onkeyup="filterAssets()">
+                        <select id="filterStatus" class="px-4 py-2 border border-gray-300 rounded" onchange="filterAssets()">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="Hoạt động">Hoạt động</option>
+                            <option value="Bảo trì">Bảo trì</option>
+                            <option value="Hỏng">Hỏng</option>
+                            <option value="Ngừng hoạt động">Ngừng hoạt động</option>
+                        </select>
+                    </div>
+                </div>
+
+                 Assets Table 
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã tài sản</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên tài sản</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Loại</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khách hàng</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assetsTableBody">
+                             Data will be loaded here 
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+     Add/Edit Asset Modal 
+    <div id="assetModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold" id="modalTitle">Thêm tài sản mới</h3>
+                <button onclick="closeAssetModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <form id="assetForm" onsubmit="saveAsset(event)">
+                <input type="hidden" id="assetId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Mã tài sản *</label>
+                        <input type="text" id="assetCode" required class="w-full px-3 py-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Tên tài sản *</label>
+                        <input type="text" id="assetName" required class="w-full px-3 py-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Loại tài sản *</label>
+                        <input type="text" id="assetType" required class="w-full px-3 py-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Khách hàng *</label>
+                        <select id="assetCustomer" required class="w-full px-3 py-2 border border-gray-300 rounded">
+                            <option value="">Chọn khách hàng</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Số serial</label>
+                        <input type="text" id="assetSerial" class="w-full px-3 py-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Nhà sản xuất</label>
+                        <input type="text" id="assetManufacturer" class="w-full px-3 py-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Model</label>
+                        <input type="text" id="assetModel" class="w-full px-3 py-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Ngày mua</label>
+                        <input type="date" id="assetPurchaseDate" class="w-full px-3 py-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Giá trị (VNĐ)</label>
+                        <input type="number" id="assetValue" class="w-full px-3 py-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Vị trí</label>
+                        <input type="text" id="assetLocation" class="w-full px-3 py-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Trạng thái *</label>
+                        <select id="assetStatus" required class="w-full px-3 py-2 border border-gray-300 rounded">
+                            <option value="Hoạt động">Hoạt động</option>
+                            <option value="Bảo trì">Bảo trì</option>
+                            <option value="Hỏng">Hỏng</option>
+                            <option value="Ngừng hoạt động">Ngừng hoạt động</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Ghi chú</label>
+                        <textarea id="assetNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" onclick="closeAssetModal()" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                        Hủy
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+     View Asset Details Modal 
+    <div id="viewAssetModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Chi tiết tài sản</h3>
+                <button onclick="closeViewAssetModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div id="assetDetails" class="space-y-3">
+                 Details will be loaded here 
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="closeViewAssetModal()" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+     Delete Confirmation Modal 
+    <div id="deleteModal" class="modal">
+        <div class="modal-content max-w-md">
+            <h3 class="text-xl font-bold mb-4">Xác nhận xóa</h3>
+            <p class="mb-6">Bạn có chắc chắn muốn xóa tài sản này không?</p>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                    Hủy
+                </button>
+                <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                    Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="data.js"></script>
+    <script>
+        checkAuth();
+        let deleteAssetId = null;
+
+        // Load assets on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAssets();
+            loadCustomersForSelect();
+        });
+
+        function loadCustomersForSelect() {
+            const customers = getData('customers');
+            const select = document.getElementById('assetCustomer');
+            select.innerHTML = '<option value="">Chọn khách hàng</option>';
+            customers.forEach(customer => {
+                select.innerHTML += `<option value="${customer.MaKH}">${customer.TenKH}</option>`;
+            });
+        }
+
+        function loadAssets() {
+            const assets = getData('assets');
+            const customers = getData('customers');
+            const tbody = document.getElementById('assetsTableBody');
+            
+            tbody.innerHTML = assets.map(asset => {
+                const customer = customers.find(c => c.MaKH === asset.MaKH);
+                const statusClass = {
+                    'Hoạt động': 'bg-green-100 text-green-800',
+                    'Bảo trì': 'bg-yellow-100 text-yellow-800',
+                    'Hỏng': 'bg-red-100 text-red-800',
+                    'Ngừng hoạt động': 'bg-gray-100 text-gray-800'
+                }[asset.TrangThai] || 'bg-gray-100 text-gray-800';
+
+                return `
+                    <tr class="border-t border-gray-200 hover:bg-gray-50">
+                        <td class="px-6 py-4">${asset.MaTS}</td>
+                        <td class="px-6 py-4 font-medium">${asset.TenTS}</td>
+                        <td class="px-6 py-4">${asset.LoaiTS}</td>
+                        <td class="px-6 py-4">${customer ? customer.TenKH : '-'}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
+                                ${asset.TrangThai}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <button onclick="viewAsset('${asset.MaTS}')" class="text-blue-600 hover:text-blue-800 mr-2">Xem</button>
+                            <button onclick="editAsset('${asset.MaTS}')" class="text-green-600 hover:text-green-800 mr-2">Sửa</button>
+                            <button onclick="deleteAsset('${asset.MaTS}')" class="text-red-600 hover:text-red-800">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterAssets() {
+            const searchTerm = document.getElementById('searchAsset').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+            const assets = getData('assets');
+            
+            const filtered = assets.filter(asset => {
+                const matchesSearch = asset.TenTS.toLowerCase().includes(searchTerm) || 
+                                    asset.MaTS.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || asset.TrangThai === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            const customers = getData('customers');
+            const tbody = document.getElementById('assetsTableBody');
+            
+            tbody.innerHTML = filtered.map(asset => {
+                const customer = customers.find(c => c.MaKH === asset.MaKH);
+                const statusClass = {
+                    'Hoạt động': 'bg-green-100 text-green-800',
+                    'Bảo trì': 'bg-yellow-100 text-yellow-800',
+                    'Hỏng': 'bg-red-100 text-red-800',
+                    'Ngừng hoạt động': 'bg-gray-100 text-gray-800'
+                }[asset.TrangThai] || 'bg-gray-100 text-gray-800';
+
+                return `
+                    <tr class="border-t border-gray-200 hover:bg-gray-50">
+                        <td class="px-6 py-4">${asset.MaTS}</td>
+                        <td class="px-6 py-4 font-medium">${asset.TenTS}</td>
+                        <td class="px-6 py-4">${asset.LoaiTS}</td>
+                        <td class="px-6 py-4">${customer ? customer.TenKH : '-'}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs rounded-full ${statusClass}">
+                                ${asset.TrangThai}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <button onclick="viewAsset('${asset.MaTS}')" class="text-blue-600 hover:text-blue-800 mr-2">Xem</button>
+                            <button onclick="editAsset('${asset.MaTS}')" class="text-green-600 hover:text-green-800 mr-2">Sửa</button>
+                            <button onclick="deleteAsset('${asset.MaTS}')" class="text-red-600 hover:text-red-800">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openAddAssetModal() {
+            document.getElementById('modalTitle').textContent = 'Thêm tài sản mới';
+            document.getElementById('assetForm').reset();
+            document.getElementById('assetId').value = '';
+            document.getElementById('assetModal').style.display = 'flex';
+        }
+
+        function closeAssetModal() {
+            document.getElementById('assetModal').style.display = 'none';
+        }
+
+        function viewAsset(id) {
+            const assets = getData('assets');
+            const customers = getData('customers');
+            const asset = assets.find(a => a.MaTS === id);
+            const customer = customers.find(c => c.MaKH === asset.MaKH);
+            
+            if (asset) {
+                document.getElementById('assetDetails').innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><strong>Mã tài sản:</strong> ${asset.MaTS}</div>
+                        <div><strong>Tên tài sản:</strong> ${asset.TenTS}</div>
+                        <div><strong>Loại:</strong> ${asset.LoaiTS}</div>
+                        <div><strong>Khách hàng:</strong> ${customer ? customer.TenKH : '-'}</div>
+                        <div><strong>Số serial:</strong> ${asset.SoSerial || '-'}</div>
+                        <div><strong>Nhà sản xuất:</strong> ${asset.NhaSanXuat || '-'}</div>
+                        <div><strong>Model:</strong> ${asset.Model || '-'}</div>
+                        <div><strong>Ngày mua:</strong> ${asset.NgayMua ? new Date(asset.NgayMua).toLocaleDateString('vi-VN') : '-'}</div>
+                        <div><strong>Giá trị:</strong> ${asset.GiaTri ? asset.GiaTri.toLocaleString('vi-VN') + ' VNĐ' : '-'}</div>
+                        <div><strong>Vị trí:</strong> ${asset.ViTri || '-'}</div>
+                        <div><strong>Trạng thái:</strong> ${asset.TrangThai}</div>
+                        <div class="col-span-2"><strong>Ghi chú:</strong> ${asset.GhiChu || '-'}</div>
+                    </div>
+                `;
+                document.getElementById('viewAssetModal').style.display = 'flex';
+            }
+        }
+
+        function closeViewAssetModal() {
+            document.getElementById('viewAssetModal').style.display = 'none';
+        }
+
+        function editAsset(id) {
+            const assets = getData('assets');
+            const asset = assets.find(a => a.MaTS === id);
+            
+            if (asset) {
+                document.getElementById('modalTitle').textContent = 'Chỉnh sửa tài sản';
+                document.getElementById('assetId').value = asset.MaTS;
+                document.getElementById('assetCode').value = asset.MaTS;
+                document.getElementById('assetCode').disabled = true;
+                document.getElementById('assetName').value = asset.TenTS;
+                document.getElementById('assetType').value = asset.LoaiTS;
+                document.getElementById('assetCustomer').value = asset.MaKH;
+                document.getElementById('assetSerial').value = asset.SoSerial || '';
+                document.getElementById('assetManufacturer').value = asset.NhaSanXuat || '';
+                document.getElementById('assetModel').value = asset.Model || '';
+                document.getElementById('assetPurchaseDate').value = asset.NgayMua || '';
+                document.getElementById('assetValue').value = asset.GiaTri || '';
+                document.getElementById('assetLocation').value = asset.ViTri || '';
+                document.getElementById('assetStatus').value = asset.TrangThai;
+                document.getElementById('assetNotes').value = asset.GhiChu || '';
+                document.getElementById('assetModal').style.display = 'flex';
+            }
+        }
+
+        function saveAsset(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('assetId').value;
+            const assetData = {
+                MaTS: document.getElementById('assetCode').value,
+                TenTS: document.getElementById('assetName').value,
+                LoaiTS: document.getElementById('assetType').value,
+                MaKH: document.getElementById('assetCustomer').value,
+                SoSerial: document.getElementById('assetSerial').value,
+                NhaSanXuat: document.getElementById('assetManufacturer').value,
+                Model: document.getElementById('assetModel').value,
+                NgayMua: document.getElementById('assetPurchaseDate').value,
+                GiaTri: parseFloat(document.getElementById('assetValue').value) || 0,
+                ViTri: document.getElementById('assetLocation').value,
+                TrangThai: document.getElementById('assetStatus').value,
+                GhiChu: document.getElementById('assetNotes').value,
+                NgayTao: id ? undefined : new Date().toISOString(),
+                NgayCapNhat: new Date().toISOString()
+            };
+
+            if (id) {
+                updateData('assets', id, assetData);
+            } else {
+                addData('assets', assetData);
+            }
+
+            closeAssetModal();
+            loadAssets();
+            document.getElementById('assetCode').disabled = false;
+        }
+
+        function deleteAsset(id) {
+            deleteAssetId = id;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            deleteAssetId = null;
+        }
+
+        function confirmDelete() {
+            if (deleteAssetId) {
+                deleteData('assets', deleteAssetId);
+                closeDeleteModal();
+                loadAssets();
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const assetModal = document.getElementById('assetModal');
+            const viewModal = document.getElementById('viewAssetModal');
+            const deleteModal = document.getElementById('deleteModal');
+            
+            if (event.target === assetModal) closeAssetModal();
+            if (event.target === viewModal) closeViewAssetModal();
+            if (event.target === deleteModal) closeDeleteModal();
+        }
+    </script>
+</body>
+</html>

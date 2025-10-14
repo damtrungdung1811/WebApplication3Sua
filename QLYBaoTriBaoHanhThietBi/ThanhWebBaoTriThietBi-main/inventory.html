@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Kho linh kiện - Hệ thống Bảo trì</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="inventory.css">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+         Sidebar 
+        <aside class="w-64 bg-white shadow-md">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-blue-600">Hệ thống Bảo trì</h1>
+            </div>
+            <nav class="mt-6">
+                <a href="dashboard.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">📊 Tổng quan</a>
+                <a href="assets.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">🏢 Tài sản</a>
+                <a href="customers.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">👥 Khách hàng</a>
+                <a href="warranties.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">🛡️ Bảo hành</a>
+                <a href="work-orders.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">📋 Phiếu công việc</a>
+                <a href="schedules.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">📅 Lịch bảo trì</a>
+                <a href="incidents.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">⚠️ Sự cố</a>
+                <a href="inventory.html" class="block px-6 py-3 bg-blue-50 text-blue-600 border-r-4 border-blue-600">🔧 Kho linh kiện</a>
+                <a href="warehouse.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">📦 Phiếu kho</a>
+                <a href="employees.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">👨‍💼 Nhân viên</a>
+                <a href="roles.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">🔐 Phân quyền</a>
+                <a href="checklists.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">✅ Checklist</a>
+                <a href="logs.html" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600">📝 Nhật ký</a>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-6">
+                <button onclick="logout()" class="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Đăng xuất</button>
+            </div>
+        </aside>
+
+         Main Content 
+        <main class="flex-1 overflow-y-auto">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Quản lý Kho linh kiện</h2>
+                    <button id="addInventoryBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">+ Thêm linh kiện</button>
+                </div>
+
+                 Search and Filter 
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <h3 class="text-lg font-semibold mb-4">Tìm kiếm và Lọc</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm linh kiện..." class="border border-gray-300 rounded-lg px-4 py-2">
+                        <select id="statusFilter" class="border border-gray-300 rounded-lg px-4 py-2">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="Còn hàng">Còn hàng</option>
+                            <option value="Sắp hết">Sắp hết</option>
+                            <option value="Hết hàng">Hết hàng</option>
+                        </select>
+                    </div>
+                </div>
+
+                 Inventory Table 
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã LK</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên linh kiện</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số lượng</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn vị</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn giá</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody" class="bg-white divide-y divide-gray-200">
+                             Data will be loaded here 
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+     Add Modal 
+    <div id="addModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-bold mb-4">Thêm linh kiện mới</h3>
+            <form id="addInventoryForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Tên linh kiện</label>
+                    <input type="text" name="name" required class="w-full border border-gray-300 rounded px-3 py-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Loại</label>
+                    <input type="text" name="type" required class="w-full border border-gray-300 rounded px-3 py-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Số lượng</label>
+                    <input type="number" name="quantity" required class="w-full border border-gray-300 rounded px-3 py-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Đơn vị</label>
+                    <input type="text" name="unit" required class="w-full border border-gray-300 rounded px-3 py-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Đơn giá</label>
+                    <input type="number" name="price" required class="w-full border border-gray-300 rounded px-3 py-2">
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('addModal')" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Hủy</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Thêm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="data.js"></script>
+    <script src="inventory.js"></script>
+</body>
+</html>

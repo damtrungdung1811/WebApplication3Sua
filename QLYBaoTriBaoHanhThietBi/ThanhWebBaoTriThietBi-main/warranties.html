@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Bảo hành - Hệ thống Bảo trì</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="warranties.css">
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Hệ thống Bảo trì</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html">Tổng quan</a>
+                <a href="assets.html">Tài sản</a>
+                <a href="customers.html">Khách hàng</a>
+                <a href="warranties.html" class="active">Bảo hành</a>
+                <a href="work-orders.html">Phiếu công việc</a>
+                <a href="schedules.html">Lịch bảo trì</a>
+                <a href="incidents.html">Sự cố</a>
+                <a href="inventory.html">Kho linh kiện</a>
+                <a href="warehouse.html">Phiếu kho</a>
+                <a href="employees.html">Nhân viên</a>
+                <a href="roles.html">Phân quyền</a>
+                <a href="checklists.html">Checklist</a>
+                <a href="logs.html">Nhật ký</a>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <div class="page-container">
+                <div class="page-header">
+                    <h1>Quản lý Bảo hành</h1>
+                    <button class="btn btn-primary" id="addWarrantyBtn">+ Thêm bảo hành</button>
+                </div>
+                
+                <div class="toolbar">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm bảo hành...">
+                    </div>
+                    <div class="filter-group">
+                        <label>Trạng thái:</label>
+                        <select id="statusFilter">
+                            <option value="all">Tất cả</option>
+                            <option value="Còn hạn">Còn hạn</option>
+                            <option value="Sắp hết hạn">Sắp hết hạn</option>
+                            <option value="Hết hạn">Hết hạn</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Mã BH</th>
+                                    <th>Tài sản</th>
+                                    <th>Nhà cung cấp</th>
+                                    <th>Ngày bắt đầu</th>
+                                    <th>Ngày kết thúc</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="warrantiesTableBody">
+                                <tr><td colspan="7" style="text-align: center; padding: 2rem;">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+     Modal 
+    <div id="warrantyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Thêm bảo hành mới</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <form id="warrantyForm">
+                <div class="form-group">
+                    <label>Tài sản *</label>
+                    <select id="assetId" required>
+                        <option value="">Chọn tài sản</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nhà cung cấp *</label>
+                    <input type="text" id="supplier" required>
+                </div>
+                <div class="form-group">
+                    <label>Ngày bắt đầu *</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Ngày kết thúc *</label>
+                    <input type="date" id="endDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Điều khoản</label>
+                    <textarea id="terms" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="document.getElementById('warrantyModal').style.display='none'">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="warranties.js"></script>
+</body>
+</html>
